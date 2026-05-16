@@ -40,7 +40,7 @@ const subscription = {
 const ok = (data) => JSON.stringify({
   success: true,
   message: "OK",
-  data: data,
+  ...data,
   server_time: new Date().toISOString(),
   error: null
 });
