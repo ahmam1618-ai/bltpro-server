@@ -1,11 +1,34 @@
 {
-  "name": "bltpro-mock-server",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
+  "success": true,
+  "data": {
+    "subscriber_id": "...",
+    "username": "...",
+    "name": "...",
+    "status": "active",
+    "can_broadcast": true,
+    "username_required": false,
+    "subscription": {
+      "start_date": "...",
+      "end_date": "...",
+      "expires_at": "...",
+      "remaining_seconds": 99999999,
+      "is_expired": false,
+      "has_no_expiry": false,
+      "days_remaining": 1825,
+      "is_trial": false,
+      "validity_days": 1825
+    },
+    "company": {
+      "id": "...",
+      "name_en": "...",
+      "name_ar": "..."
+    },
+    "support_link": null
   },
-  "engines": {
-    "node": ">=16"
-  }
+  "error": null,
+  "message": "OK",
+  "message_ar": null,
+  "server_time": 1234567890,
+  "action": null,
+  "reason": null
 }
