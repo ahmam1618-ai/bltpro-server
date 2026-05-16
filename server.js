@@ -70,12 +70,12 @@ const server = http.createServer((req, res) => {
     console.log(req.method, url);
     console.log('Body:', body);
 
-    // تسجيل الدخول
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
+      const resp = apiResponse({ user, subscription });
+      console.log('Response:', resp);
       res.writeHead(200);
-      res.end(apiResponse({ user, subscription }));
+      res.end(resp);
 
-    // بيانات المستخدم
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
       res.end(JSON.stringify({
@@ -95,28 +95,23 @@ const server = http.createServer((req, res) => {
         server_time: Date.now()
       }));
 
-    // الإعدادات
     } else if (url.includes('settings')) {
       const key = req.url.includes('version_code') ? '14' : '';
       res.writeHead(200);
       res.end(apiResponse({ value: key, success: true, error: null }));
 
-    // Heartbeat
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
       res.end(apiResponse({ action: "continue", next_check_in: 300, reason: null }));
 
-    // Assets
     } else if (url.includes('asset')) {
       res.writeHead(200);
       res.end(apiResponse({ id: "mock-asset-001" }));
 
-    // Profile
     } else if (url.includes('profile')) {
       res.writeHead(200);
       res.end(apiResponse({ updated: true }));
 
-    // Catch All
     } else {
       res.writeHead(200);
       res.end(apiResponse({ user, subscription }));
