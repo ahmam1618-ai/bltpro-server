@@ -11,7 +11,7 @@ const userV4 = {
 
 const subscriptionV4 = {
   id: "mock-sub-001",
-  activation_code: "DEMO123",
+  activation_code: "VIP-123456",
   start_date: "2025-01-01",
   end_date: "2030-12-31",
   expires_at: "2030-12-31T23:59:59",
@@ -76,8 +76,10 @@ const server = http.createServer((req, res) => {
     console.log('Body:', body);
 
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
+      const resp = apiResponse(subscriberDataV4);
+      console.log('Response:', resp);
       res.writeHead(200);
-      res.end(apiResponse(subscriberDataV4));
+      res.end(resp);
 
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
