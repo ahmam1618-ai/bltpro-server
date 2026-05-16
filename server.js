@@ -6,7 +6,8 @@ const userV4 = {
   display_name: "مستخدم تجريبي",
   android_id: "",
   status: "active",
-  created_at: "2025-01-01T00:00:00"
+  created_at: "2025-01-01T00:00:00",
+  signal_id: "mock-signal-001"
 };
 
 const subscriptionV4 = {
