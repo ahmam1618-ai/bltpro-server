@@ -37,12 +37,15 @@ const subscription = {
   activation_code: "DEMO123"
 };
 
-const ok = (data) => JSON.stringify({
+const apiResponse = (data) => JSON.stringify({
   success: true,
+  data: data,
+  error: null,
   message: "OK",
-  ...data,
-  server_time: new Date().toISOString(),
-  error: null
+  message_ar: null,
+  server_time: Date.now(),
+  action: null,
+  reason: null
 });
 
 const server = http.createServer((req, res) => {
@@ -67,42 +70,56 @@ const server = http.createServer((req, res) => {
     console.log(req.method, url);
     console.log('Body:', body);
 
-    if (url.includes('activation/validate') || 
-        url.includes('activate') || 
-        url.includes('activation') ||
-        url.includes('login')) {
+    // تسجيل الدخول
+    if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
       res.writeHead(200);
-      res.end(ok({ user, subscription }));
+      res.end(apiResponse({ user, subscription }));
 
+    // بيانات المستخدم
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
-      res.end(ok({
-        user, subscription,
-        assets: [], plates: [],
-        assets_count: 0, plates_count: 0,
-        app_update: null, support_link: null
+      res.end(JSON.stringify({
+        success: true,
+        data: {
+          user,
+          subscription,
+          assets: [],
+          plates: [],
+          assets_count: 0,
+          plates_count: 0,
+          app_update: null,
+          support_link: null
+        },
+        error: null,
+        meta: null,
+        server_time: Date.now()
       }));
 
+    // الإعدادات
     } else if (url.includes('settings')) {
       const key = req.url.includes('version_code') ? '14' : '';
       res.writeHead(200);
-      res.end(ok({ value: key, success: true, error: null }));
+      res.end(apiResponse({ value: key, success: true, error: null }));
 
+    // Heartbeat
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
-      res.end(ok({ action: "continue", next_check_in: 300, reason: null }));
+      res.end(apiResponse({ action: "continue", next_check_in: 300, reason: null }));
 
+    // Assets
     } else if (url.includes('asset')) {
       res.writeHead(200);
-      res.end(ok({ id: "mock-asset-001" }));
+      res.end(apiResponse({ id: "mock-asset-001" }));
 
+    // Profile
     } else if (url.includes('profile')) {
       res.writeHead(200);
-      res.end(ok({ updated: true }));
+      res.end(apiResponse({ updated: true }));
 
+    // Catch All
     } else {
       res.writeHead(200);
-      res.end(ok({ user, subscription }));
+      res.end(apiResponse({ user, subscription }));
     }
   });
 });
