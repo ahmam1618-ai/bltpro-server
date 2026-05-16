@@ -1,13 +1,5 @@
 const http = require('http');
 
-const successResponse = (data) => JSON.stringify({
-  success: true,
-  message: "OK",
-  data: data,
-  server_time: new Date().toISOString(),
-  error: null
-});
-
 const user = {
   id: "mock-user-001",
   username: "demo_user",
@@ -45,6 +37,14 @@ const subscription = {
   activation_code: "DEMO123"
 };
 
+const ok = (data) => JSON.stringify({
+  success: true,
+  message: "OK",
+  data: data,
+  server_time: new Date().toISOString(),
+  error: null
+});
+
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -63,19 +63,21 @@ const server = http.createServer((req, res) => {
     let parsed = {};
     try { parsed = JSON.parse(body); } catch(e) {}
 
-    console.log(req.method, req.url);
-
     const url = req.url.split('?')[0];
+    console.log(req.method, url);
 
-    // تسجيل الدخول
-    if (url.includes('activate') || url.includes('activation')) {
+    // تسجيل الدخول - كل الاحتمالات
+    if (url.includes('activation/validate') || 
+        url.includes('activate') || 
+        url.includes('activation') ||
+        url.includes('login')) {
       res.writeHead(200);
-      res.end(successResponse({ user, subscription }));
+      res.end(ok({ user, subscription }));
 
     // بيانات المستخدم
-    } else if (url.includes('subscriber') || url.includes('subscriber-data')) {
+    } else if (url.includes('subscriber')) {
       res.writeHead(200);
-      res.end(successResponse({
+      res.end(ok({
         user, subscription,
         assets: [], plates: [],
         assets_count: 0, plates_count: 0,
@@ -84,33 +86,29 @@ const server = http.createServer((req, res) => {
 
     // الإعدادات
     } else if (url.includes('settings')) {
-      const key = req.url.split('key=')[1];
-      let value = "active";
-      if (key && key.includes('version_code')) value = "14";
-      if (key && key.includes('update_url')) value = "";
-      if (key && key.includes('update_notes')) value = "";
+      const key = req.url.includes('version_code') ? '14' : '';
       res.writeHead(200);
-      res.end(successResponse({ value, success: true, error: null }));
+      res.end(ok({ value: key, success: true, error: null }));
 
     // Heartbeat
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
-      res.end(successResponse({ action: "continue", next_check_in: 300, reason: null }));
+      res.end(ok({ action: "continue", next_check_in: 300, reason: null }));
 
     // Assets
     } else if (url.includes('asset')) {
       res.writeHead(200);
-      res.end(successResponse({ id: "mock-asset-001" }));
+      res.end(ok({ id: "mock-asset-001" }));
 
     // Profile
     } else if (url.includes('profile')) {
       res.writeHead(200);
-      res.end(successResponse({ updated: true }));
+      res.end(ok({ updated: true }));
 
-    // Catch All
+    // Catch All - أي طلب آخر يرجع نجاح
     } else {
       res.writeHead(200);
-      res.end(successResponse({}));
+      res.end(ok({ user, subscription }));
     }
   });
 });
