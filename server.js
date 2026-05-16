@@ -37,17 +37,6 @@ const subscriberDataV4 = {
   app_update: null
 };
 
-const apiResponse = (data) => JSON.stringify({
-  success: true,
-  data: data,
-  error: null,
-  message: "OK",
-  message_ar: null,
-  server_time: Date.now(),
-  action: null,
-  reason: null
-});
-
 const subscriberResponse = () => JSON.stringify({
   success: true,
   data: subscriberDataV4,
@@ -76,7 +65,12 @@ const server = http.createServer((req, res) => {
     console.log('Body:', body);
 
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
-      const resp = apiResponse(subscriberDataV4);
+      const resp = JSON.stringify({
+        success: true,
+        message: "OK",
+        error: null,
+        server_time: Date.now()
+      });
       console.log('Response:', resp);
       res.writeHead(200);
       res.end(resp);
@@ -92,19 +86,19 @@ const server = http.createServer((req, res) => {
 
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
-      res.end(apiResponse({ action: "continue", next_check_in: 300, reason: null }));
+      res.end(JSON.stringify({ success: true, data: { action: "continue", next_check_in: 300, reason: null }, error: null, server_time: Date.now() }));
 
     } else if (url.includes('asset')) {
       res.writeHead(200);
-      res.end(apiResponse({ id: "mock-asset-001" }));
+      res.end(JSON.stringify({ success: true, data: { id: "mock-asset-001" }, error: null }));
 
     } else if (url.includes('profile')) {
       res.writeHead(200);
-      res.end(apiResponse({ updated: true }));
+      res.end(JSON.stringify({ success: true, data: { updated: true }, error: null }));
 
     } else {
       res.writeHead(200);
-      res.end(apiResponse(subscriberDataV4));
+      res.end(subscriberResponse());
     }
   });
 });
