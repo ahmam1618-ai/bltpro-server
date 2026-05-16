@@ -1,15 +1,5 @@
 const http = require('http');
 
-const userV4 = {
-  id: "mock-user-001",
-  username: "demo_user",
-  display_name: "مستخدم تجريبي",
-  android_id: "",
-  status: "active",
-  created_at: "2025-01-01T00:00:00",
-  signal_id: "mock-signal-001"
-};
-
 const subscriptionV4 = {
   id: "mock-sub-001",
   activation_code: "VIP-123456",
@@ -27,25 +17,6 @@ const subscriptionV4 = {
   validity_days: 1825
 };
 
-const subscriberDataV4 = {
-  user: userV4,
-  subscription: subscriptionV4,
-  assets: [],
-  assets_count: 0,
-  plates: [],
-  plates_count: 0,
-  support_link: null,
-  app_update: null
-};
-
-const subscriberResponse = () => JSON.stringify({
-  success: true,
-  data: subscriberDataV4,
-  error: null,
-  meta: null,
-  server_time: Date.now()
-});
-
 const server = http.createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -61,9 +32,41 @@ const server = http.createServer((req, res) => {
   let body = '';
   req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
+    let parsed = {};
+    try { parsed = JSON.parse(body); } catch(e) {}
+
     const url = req.url.split('?')[0];
     console.log(req.method, url);
     console.log('Body:', body);
+
+    const userV4 = {
+      id: "mock-user-001",
+      username: parsed.username || "demo_user",
+      display_name: parsed.username || "مستخدم تجريبي",
+      android_id: parsed.android_id || parsed.device_id || "",
+      status: "active",
+      created_at: "2025-01-01T00:00:00",
+      signal_id: "mock-signal-001"
+    };
+
+    const subscriberDataV4 = {
+      user: userV4,
+      subscription: subscriptionV4,
+      assets: [],
+      assets_count: 0,
+      plates: [],
+      plates_count: 0,
+      support_link: null,
+      app_update: null
+    };
+
+    const subscriberResponse = JSON.stringify({
+      success: true,
+      data: subscriberDataV4,
+      error: null,
+      meta: null,
+      server_time: Date.now()
+    });
 
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
       const resp = JSON.stringify({
@@ -79,7 +82,7 @@ const server = http.createServer((req, res) => {
 
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
-      res.end(subscriberResponse());
+      res.end(subscriberResponse);
 
     } else if (url.includes('settings')) {
       const value = req.url.includes('version_code') ? '14' : '';
@@ -100,7 +103,7 @@ const server = http.createServer((req, res) => {
 
     } else {
       res.writeHead(200);
-      res.end(subscriberResponse());
+      res.end(subscriberResponse);
     }
   });
 });
