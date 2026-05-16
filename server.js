@@ -1,40 +1,40 @@
 const http = require('http');
 
-const user = {
+const userV4 = {
   id: "mock-user-001",
   username: "demo_user",
-  name: "مستخدم تجريبي",
-  status: "active",
-  activation_code: "DEMO123",
+  display_name: "مستخدم تجريبي",
   android_id: "",
-  company_id: "mock-company-001",
-  start_date: "2025-01-01",
-  end_date: "2030-12-31",
-  expires_at: "2030-12-31T23:59:59",
-  remaining_seconds: 99999999,
-  is_trial: false,
-  signal_id: "mock-signal-001",
-  can_broadcast: true,
-  support_link_url: null,
-  support_link_icon: null,
-  support_link_color: null,
-  support_link_label: null
+  status: "active",
+  created_at: "2025-01-01T00:00:00"
 };
 
-const subscription = {
+const subscriptionV4 = {
   id: "mock-sub-001",
-  status: "active",
+  activation_code: "DEMO123",
   start_date: "2025-01-01",
   end_date: "2030-12-31",
   expires_at: "2030-12-31T23:59:59",
   remaining_seconds: 99999999,
   remaining_days: 1825,
   max_assets: 100,
+  status: "active",
+  paused_at: null,
+  company_id: "mock-company-001",
   can_broadcast: true,
   is_trial: false,
-  validity_days: 1825,
-  company_id: "mock-company-001",
-  activation_code: "DEMO123"
+  validity_days: 1825
+};
+
+const subscriberDataV4 = {
+  user: userV4,
+  subscription: subscriptionV4,
+  assets: [],
+  assets_count: 0,
+  plates: [],
+  plates_count: 0,
+  support_link: null,
+  app_update: null
 };
 
 const apiResponse = (data) => JSON.stringify({
@@ -46,6 +46,14 @@ const apiResponse = (data) => JSON.stringify({
   server_time: Date.now(),
   action: null,
   reason: null
+});
+
+const subscriberResponse = () => JSON.stringify({
+  success: true,
+  data: subscriberDataV4,
+  error: null,
+  meta: null,
+  server_time: Date.now()
 });
 
 const server = http.createServer((req, res) => {
@@ -63,42 +71,22 @@ const server = http.createServer((req, res) => {
   let body = '';
   req.on('data', chunk => { body += chunk; });
   req.on('end', () => {
-    let parsed = {};
-    try { parsed = JSON.parse(body); } catch(e) {}
-
     const url = req.url.split('?')[0];
     console.log(req.method, url);
     console.log('Body:', body);
 
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
-      const resp = apiResponse({ user, subscription });
-      console.log('Response:', resp);
       res.writeHead(200);
-      res.end(resp);
+      res.end(apiResponse(subscriberDataV4));
 
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
-      res.end(JSON.stringify({
-        success: true,
-        data: {
-          user,
-          subscription,
-          assets: [],
-          plates: [],
-          assets_count: 0,
-          plates_count: 0,
-          app_update: null,
-          support_link: null
-        },
-        error: null,
-        meta: null,
-        server_time: Date.now()
-      }));
+      res.end(subscriberResponse());
 
     } else if (url.includes('settings')) {
-      const key = req.url.includes('version_code') ? '14' : '';
+      const value = req.url.includes('version_code') ? '14' : '';
       res.writeHead(200);
-      res.end(apiResponse({ value: key, success: true, error: null }));
+      res.end(JSON.stringify({ success: true, value: value, error: null }));
 
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
@@ -114,7 +102,7 @@ const server = http.createServer((req, res) => {
 
     } else {
       res.writeHead(200);
-      res.end(apiResponse({ user, subscription }));
+      res.end(apiResponse(subscriberDataV4));
     }
   });
 });
