@@ -65,8 +65,8 @@ const server = http.createServer((req, res) => {
 
     const url = req.url.split('?')[0];
     console.log(req.method, url);
+    console.log('Body:', body);
 
-    // تسجيل الدخول - كل الاحتمالات
     if (url.includes('activation/validate') || 
         url.includes('activate') || 
         url.includes('activation') ||
@@ -74,7 +74,6 @@ const server = http.createServer((req, res) => {
       res.writeHead(200);
       res.end(ok({ user, subscription }));
 
-    // بيانات المستخدم
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
       res.end(ok({
@@ -84,28 +83,23 @@ const server = http.createServer((req, res) => {
         app_update: null, support_link: null
       }));
 
-    // الإعدادات
     } else if (url.includes('settings')) {
       const key = req.url.includes('version_code') ? '14' : '';
       res.writeHead(200);
       res.end(ok({ value: key, success: true, error: null }));
 
-    // Heartbeat
     } else if (url.includes('heartbeat')) {
       res.writeHead(200);
       res.end(ok({ action: "continue", next_check_in: 300, reason: null }));
 
-    // Assets
     } else if (url.includes('asset')) {
       res.writeHead(200);
       res.end(ok({ id: "mock-asset-001" }));
 
-    // Profile
     } else if (url.includes('profile')) {
       res.writeHead(200);
       res.end(ok({ updated: true }));
 
-    // Catch All - أي طلب آخر يرجع نجاح
     } else {
       res.writeHead(200);
       res.end(ok({ user, subscription }));
