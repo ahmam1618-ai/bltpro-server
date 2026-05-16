@@ -1,20 +1,35 @@
 const http = require('http');
 
-const subscriptionV4 = {
-  id: "mock-sub-001",
-  activation_code: "VIP-123456",
-  start_date: "2025-01-01",
-  end_date: "2030-12-31",
-  expires_at: "2030-12-31T23:59:59",
-  remaining_seconds: 99999999,
-  remaining_days: 1825,
-  max_assets: 100,
+const subscriptionData = {
+  subscriber_id: "mock-user-001",
+  username: "demo_user",
+  name: "مستخدم تجريبي",
   status: "active",
-  paused_at: null,
-  company_id: "mock-company-001",
   can_broadcast: true,
-  is_trial: false,
-  validity_days: 1825
+  username_required: false,
+  subscription: {
+    start_date: "2025-01-01",
+    end_date: "2030-12-31",
+    expires_at: "2030-12-31T23:59:59",
+    remaining_seconds: 99999999,
+    is_expired: false,
+    has_no_expiry: false,
+    days_remaining: 1825,
+    is_trial: false,
+    validity_days: 1825
+  },
+  company: {
+    id: "mock-company-001",
+    name_en: "Mock Company",
+    name_ar: "شركة تجريبية"
+  },
+  support_link: null
+};
+
+const subscriberDataV4 = {
+  user: { id: "mock-user-001", username: "demo_user", display_name: "مستخدم تجريبي", android_id: "", status: "active", created_at: "2025-01-01T00:00:00" },
+  subscription: { id: "mock-sub-001", activation_code: "VIP-123456", start_date: "2025-01-01", end_date: "2030-12-31", expires_at: "2030-12-31T23:59:59", remaining_seconds: 99999999, remaining_days: 1825, max_assets: 100, status: "active", paused_at: null, company_id: "mock-company-001", can_broadcast: true, is_trial: false, validity_days: 1825 },
+  assets: [], assets_count: 0, plates: [], plates_count: 0, support_link: null, app_update: null
 };
 
 const server = http.createServer((req, res) => {
@@ -39,50 +54,16 @@ const server = http.createServer((req, res) => {
     console.log(req.method, url);
     console.log('Body:', body);
 
-    const userV4 = {
-      id: "mock-user-001",
-      username: parsed.username || "demo_user",
-      display_name: parsed.username || "مستخدم تجريبي",
-      android_id: parsed.android_id || parsed.device_id || "",
-      status: "active",
-      created_at: "2025-01-01T00:00:00",
-      signal_id: "mock-signal-001"
-    };
-
-    const subscriberDataV4 = {
-      user: userV4,
-      subscription: subscriptionV4,
-      assets: [],
-      assets_count: 0,
-      plates: [],
-      plates_count: 0,
-      support_link: null,
-      app_update: null
-    };
-
-    const subscriberResponse = JSON.stringify({
-      success: true,
-      data: subscriberDataV4,
-      error: null,
-      meta: null,
-      server_time: Date.now()
-    });
-
     if (url.includes('activation') || url.includes('activate') || url.includes('login')) {
-      const resp = JSON.stringify({
-        success: true,
-        message: "OK",
-        data: subscriberDataV4,
-        error: null,
-        server_time: Date.now()
-      });
+      const data = Object.assign({}, subscriptionData, { username: parsed.username || subscriptionData.username });
+      const resp = JSON.stringify({ success: true, data: data, error: null, message: "OK", message_ar: null, server_time: Date.now(), action: null, reason: null });
       console.log('Response:', resp);
       res.writeHead(200);
       res.end(resp);
 
     } else if (url.includes('subscriber')) {
       res.writeHead(200);
-      res.end(subscriberResponse);
+      res.end(JSON.stringify({ success: true, data: subscriberDataV4, error: null, meta: null, server_time: Date.now() }));
 
     } else if (url.includes('settings')) {
       const value = req.url.includes('version_code') ? '14' : '';
@@ -93,17 +74,9 @@ const server = http.createServer((req, res) => {
       res.writeHead(200);
       res.end(JSON.stringify({ success: true, data: { action: "continue", next_check_in: 300, reason: null }, error: null, server_time: Date.now() }));
 
-    } else if (url.includes('asset')) {
-      res.writeHead(200);
-      res.end(JSON.stringify({ success: true, data: { id: "mock-asset-001" }, error: null }));
-
-    } else if (url.includes('profile')) {
-      res.writeHead(200);
-      res.end(JSON.stringify({ success: true, data: { updated: true }, error: null }));
-
     } else {
       res.writeHead(200);
-      res.end(subscriberResponse);
+      res.end(JSON.stringify({ success: true, data: subscriberDataV4, error: null, server_time: Date.now() }));
     }
   });
 });
