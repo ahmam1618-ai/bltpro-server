@@ -68,6 +68,7 @@ const server = http.createServer((req, res) => {
       const resp = JSON.stringify({
         success: true,
         message: "OK",
+        data: subscriberDataV4,
         error: null,
         server_time: Date.now()
       });
@@ -104,4 +105,5 @@ const server = http.createServer((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.env.PORT || 3000;
 server.listen(PORT, () => console.log('Mock Server running on port ' + PORT));
